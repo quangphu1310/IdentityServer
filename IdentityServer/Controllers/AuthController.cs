@@ -28,7 +28,11 @@ namespace IdentityServer.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var response = _authService.Login(request);
+            //if (ModelState.IsValid)
+            //{
+
+            //}
+                var response = _authService.Login(request);
 
             if (!response.IsSuccess)
                 return StatusCode((int)response.StatusCode, response);

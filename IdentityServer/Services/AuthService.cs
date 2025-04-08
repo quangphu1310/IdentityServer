@@ -4,6 +4,7 @@ using IdentityServer.Repositories.IRepositories;
 using IdentityServer.Services.IServices;
 using Microsoft.AspNetCore.Identity;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace IdentityServer.Services
 {
@@ -23,15 +24,38 @@ namespace IdentityServer.Services
         {
             var response = new APIResponse();
 
+            if (!IsValidEmail(request.Username))
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Errors.Add("Username must be a valid email address.");
+                return response;
+            }
+
+            var passwordErrors = ValidatePassword(request.Password);
+            if (passwordErrors.Any())
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Errors.AddRange(passwordErrors);
+                return response;
+            }
+
             var existing = _userRepo.GetByUsername(request.Username);
             if (existing != null)
             {
                 response.IsSuccess = false;
                 response.StatusCode = HttpStatusCode.BadRequest;
-                response.Errors.Add("Username already exists");
+                response.Errors.Add("Username already exists.");
                 return response;
             }
-
+            if (request.Password != request.ConfirmPassword)
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Errors.Add("Password and ConfirmPassword do not match");
+                return response;
+            }
             var passwordHasher = new PasswordHasher<User>();
             var newUser = new User
             {
@@ -45,10 +69,39 @@ namespace IdentityServer.Services
             response.Result = "User created successfully";
             return response;
         }
+        private bool IsValidEmail(string email)
+        {
+            return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        }
+
+        private List<string> ValidatePassword(string password)
+        {
+            var errors = new List<string>();
+
+            if (password.Length < 6)
+                errors.Add("Password must be at least 6 characters long.");
+
+            if (!Regex.IsMatch(password, @"[A-Z]"))
+                errors.Add("Password must contain at least one uppercase letter.");
+
+            if (!Regex.IsMatch(password, @"\d"))
+                errors.Add("Password must contain at least one number.");
+
+            if (!Regex.IsMatch(password, @"[\W_]"))
+                errors.Add("Password must contain at least one special character.");
+
+            return errors;
+        }
         public APIResponse Login(LoginRequest request)
         {
             var response = new APIResponse();
-
+            if (!IsValidEmail(request.Username))
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Errors.Add("Username must be a valid email address.");
+                return response;
+            }
             var user = _userRepo.GetByUsername(request.Username);
             if (user == null)
             {
