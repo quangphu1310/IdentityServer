@@ -5,9 +5,9 @@ namespace IdentityServer.Services.IServices
 {
     public interface IAuthService
     {
-        APIResponse Login(LoginRequest loginRequest);
-        APIResponse RefreshToken(string refreshToken);
-        APIResponse Logout(string refreshToken);
-        APIResponse Register(RegisterRequest request);
+        Task<APIResponse> Login(LoginRequest loginRequest);
+        Task<APIResponse> RefreshToken(string refreshToken);
+        Task<APIResponse> Logout(string refreshToken);
+        Task<APIResponse> Register(RegisterRequest request);
     }
 }

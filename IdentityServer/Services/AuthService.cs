@@ -20,11 +20,11 @@ namespace IdentityServer.Services
             _tokenService = tokenService;
             _tokenRepo = tokenRepo;
         }
-        public APIResponse Register(RegisterRequest request)
+        public async Task<APIResponse> Register(RegisterRequest request)
         {
             var response = new APIResponse();
 
-            var existing = _userRepo.GetByUsername(request.Username);
+            var existing = await _userRepo.GetByUsername(request.Username);
             if (existing != null)
             {
                 response.IsSuccess = false;
@@ -40,7 +40,7 @@ namespace IdentityServer.Services
             };
             newUser.PasswordHash = passwordHasher.HashPassword(newUser, request.Password);
 
-            _userRepo.Add(newUser);
+            await _userRepo.Add(newUser);
 
             response.StatusCode = HttpStatusCode.Created;
             response.IsSuccess = true;
@@ -48,11 +48,11 @@ namespace IdentityServer.Services
             return response;
         }
 
-        public APIResponse Login(LoginRequest request)
+        public async Task<APIResponse> Login(LoginRequest request)
         {
             var response = new APIResponse();
             
-            var user = _userRepo.GetByUsername(request.Username);
+            var user = await _userRepo.GetByUsername(request.Username);
             if (user == null)
             {
                 response.IsSuccess = false;
@@ -75,7 +75,7 @@ namespace IdentityServer.Services
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            _tokenRepo.SaveRefreshToken(new RefreshToken
+            await _tokenRepo.SaveRefreshToken(new RefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
@@ -92,11 +92,11 @@ namespace IdentityServer.Services
             return response;
         }
 
-        public APIResponse RefreshToken(string refreshToken)
+        public async Task<APIResponse> RefreshToken(string refreshToken)
         {
             var response = new APIResponse();
 
-            var token = _tokenRepo.GetByToken(refreshToken);
+            var token = await _tokenRepo.GetByToken(refreshToken);
             if (token == null || token.IsRevoked || token.ExpiryDate < DateTime.UtcNow)
             {
                 response.IsSuccess = false;
@@ -115,12 +115,12 @@ namespace IdentityServer.Services
             return response;
         }
 
-        public APIResponse Logout(string refreshToken)
+        public async Task<APIResponse> Logout(string refreshToken)
         {
             var response = new APIResponse();
 
-            var token = _tokenRepo.GetByToken(refreshToken);
-            if (token == null || token.IsRevoked)
+            var token = await _tokenRepo.GetByToken(refreshToken);
+            if (token == null ||  token.IsRevoked)
             {
                 response.IsSuccess = false;
                 response.StatusCode = HttpStatusCode.BadRequest;
@@ -128,7 +128,7 @@ namespace IdentityServer.Services
                 return response;
             }
 
-            _tokenRepo.RevokeToken(refreshToken);
+            await _tokenRepo.RevokeToken(refreshToken);
 
             response.StatusCode = HttpStatusCode.OK;
             response.Result = "Logged out successfully";

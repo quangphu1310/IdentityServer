@@ -4,9 +4,9 @@ namespace IdentityServer.Repositories.IRepositories
 {
     public interface IUserRepository
     {
-        User GetByUsername(string username);
-        User GetById(int id);
-        void Add(User user);
+        Task<User> GetByUsername(string username);
+        Task<User> GetById(int id);
+        Task Add(User user);
 
     }
 }

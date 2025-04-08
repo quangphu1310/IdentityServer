@@ -14,28 +14,22 @@ namespace IdentityServer.Repositories
             _context = context;
         }
 
-        public void SaveRefreshToken(RefreshToken token)
+        public async Task SaveRefreshToken(RefreshToken token)
         {
-            //var tokenCreate = new RefreshToken
-            //{
-            //    ExpiryDate = token.ExpiryDate,
-            //    UserId = token.UserId,
-            //    Token = token.Token
-            //};
-            _context.RefreshTokens.Add(token);
+            await _context.RefreshTokens.AddAsync(token);
             _context.SaveChanges();
         }
 
-        public RefreshToken GetByToken(string token) =>
-            _context.RefreshTokens.Include(r => r.User).FirstOrDefault(r => r.Token == token);
+        public async Task<RefreshToken> GetByToken(string token) =>
+            await _context.RefreshTokens.Include(r => r.User).FirstOrDefaultAsync(r => r.Token == token);
 
-        public void RevokeToken(string token)
+        public async Task RevokeToken(string token)
         {
-            var rt = GetByToken(token);
+            var rt = await GetByToken(token);
             if (rt != null)
             {
                 rt.IsRevoked = true;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }

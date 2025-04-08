@@ -35,6 +35,9 @@ namespace IdentityServer.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public string GenerateRefreshToken() => Guid.NewGuid().ToString();
+        public string GenerateRefreshToken()
+        {
+            return Guid.NewGuid().ToString();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using IdentityServer.Data;
 using IdentityServer.Models;
 using IdentityServer.Repositories.IRepositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityServer.Repositories
 {
@@ -11,19 +12,19 @@ namespace IdentityServer.Repositories
         {
             _context = context;
         }
-        public User GetById(int id)
+        public async Task<User> GetById(int id)
         {
-            return _context.Users.FirstOrDefault(x => x.Id == id);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public User GetByUsername(string username)
+        public async Task<User> GetByUsername(string username)
         {
-            return _context.Users.FirstOrDefault(x=>x.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(x=>x.Username == username);
         }
-        public void Add(User user)
+        public async Task Add(User user)
         {
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
         }
 
     }

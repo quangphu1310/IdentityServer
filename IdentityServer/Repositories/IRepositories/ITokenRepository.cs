@@ -4,8 +4,8 @@ namespace IdentityServer.Repositories.IRepositories
 {
     public interface ITokenRepository
     {
-        void SaveRefreshToken(RefreshToken refreshToken); 
-        RefreshToken GetByToken(string token);
-        void RevokeToken(string token);
+        Task SaveRefreshToken(RefreshToken refreshToken); 
+        Task<RefreshToken> GetByToken(string token);
+        Task RevokeToken(string token);
     }
 }

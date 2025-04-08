@@ -20,14 +20,14 @@ namespace IdentityServer.Controllers
             _authService = authService;
         }
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<ActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return ValidationProblem();
             }
 
-            var response = _authService.Login(request);
+            var response = await _authService.Login(request);
 
             if (!response.IsSuccess)
             {
@@ -58,22 +58,22 @@ namespace IdentityServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return ValidationProblem();
             }
 
-            var response = _authService.Register(request);
+            var response = await _authService.Register(request);
             return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("refresh")]
-        public IActionResult Refresh()
+        public async Task<ActionResult> Refresh()
         {
             var refreshToken = Request.Cookies["refreshToken"];
-            var response = _authService.RefreshToken(refreshToken);
+            var response = await _authService.RefreshToken(refreshToken);
             var accessToken = ((LoginResponse)response.Result).AccessToken;
             Response.Cookies.Append("accessToken", accessToken, new CookieOptions
             {
@@ -87,12 +87,10 @@ namespace IdentityServer.Controllers
         }
 
         [HttpPost("logout")]
-        public IActionResult Logout()
+        public async Task<ActionResult> Logout()
         {
             var refreshToken = Request.Cookies["refreshToken"];
-            var response = _authService.Logout(refreshToken);
-            Response.Cookies.Delete("accessToken");
-            Response.Cookies.Delete("refreshToken");
+            var response = await _authService.Logout(refreshToken);
             Response.Cookies.Append("accessToken", "", new CookieOptions
             {
                 Expires = DateTime.UtcNow.AddDays(-1),
