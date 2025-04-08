@@ -117,8 +117,8 @@ builder.Services.AddAuthentication(o =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
         ValidateIssuer = false,
         ValidateAudience = false,
-        ValidateLifetime = true,  // Quan trọng để kiểm tra thời gian hết hạn
-        ClockSkew = TimeSpan.Zero  // Để giảm độ trễ khi kiểm tra hết hạn
+        ValidateLifetime = true,  
+        ClockSkew = TimeSpan.Zero
     };
 });
 var app = builder.Build();
